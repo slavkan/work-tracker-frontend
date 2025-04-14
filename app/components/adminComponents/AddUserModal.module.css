@@ -1,0 +1,12 @@
+.checkboxTwoRows{
+  display: flex;
+  flex-direction: row;
+  column-gap: 2em;
+}
+
+.companyCheckboxContainer{
+  display: flex;
+  flex-direction: column;
+  row-gap: 1em;
+  margin-top: 10px;
+}

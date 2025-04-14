@@ -1,0 +1,44 @@
+.page{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.loginWidth{
+  width: 300px;
+}
+
+.fullWidth{
+  width: 100%;
+}
+
+.boja {
+  background-color: var(--mantine-primary-color-1);
+}
+
+.addCredsContainer1{
+  position: fixed;
+  bottom: 5px;
+  right: 105px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+.addCredsContainer2{
+  position: fixed;
+  bottom: 5px;
+  right: 5px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+@media (max-width: 350px) {
+  .loginWidth{
+    width: 90%;
+  }
+}

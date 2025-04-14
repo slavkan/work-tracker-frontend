@@ -1,0 +1,37 @@
+.accordionWrapper{
+  display: flex;
+  justify-content: center;
+}
+
+.accordionWidth{
+  width: 50%;
+  max-width: 500px;
+  /* background-color: grey; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.pageHeading{
+  display: flex;
+  flex-direction: row;
+  column-gap: 10px;
+  margin-bottom: 10px;
+}
+
+.mainAccordion{
+  width: 100%;
+}
+
+.departmentLinkButtons{
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* Bellow 1400px  */
+@media (max-width: 1400px) {
+  .accordionWidth{
+    width: 80%;
+  }
+}
