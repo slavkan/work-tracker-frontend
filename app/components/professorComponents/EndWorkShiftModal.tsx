@@ -5,6 +5,7 @@ import {
   TextInput,
   Checkbox,
   PasswordInput,
+  Loader,
 } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
@@ -42,6 +43,8 @@ export default function EndWorkShiftModal({
 
   const [nullifySessions, setNullifySessions] = useState(false);
 
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
   const handleClose = () => {
     setLoginCred({
       username: decodedToken ? decodedToken.username : "",
@@ -74,6 +77,9 @@ export default function EndWorkShiftModal({
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+
+    setLoadingButtonQuery(true);
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
@@ -85,11 +91,13 @@ export default function EndWorkShiftModal({
           body: JSON.stringify(loginCred),
         }
       );
-  
+
+      setLoadingButtonQuery(false);
+
       if (response.ok) {
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/work-shifts/end?workShiftId=${workShiftId}${
-          nullifySessions ? '&nullifyUnfinishedAttendances=true' : ''
-        }`;
+        setLoadingButtonQuery(true);
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/work-shifts/end?workShiftId=${workShiftId}${nullifySessions ? '&nullifyUnfinishedAttendances=true' : ''
+          }`;
         const startSessionResponse = await fetch(
           apiUrl,
           {
@@ -100,7 +108,9 @@ export default function EndWorkShiftModal({
             },
           }
         );
-  
+
+        setLoadingButtonQuery(false);
+
         if (startSessionResponse.ok) {
           notifications.show({
             withBorder: true,
@@ -163,6 +173,9 @@ export default function EndWorkShiftModal({
           />
           <Button color="red" type="submit" fullWidth mt={20}>
             Završi smjenu
+            {loadingButtonQuery &&
+              <Loader color="white" size={20} ml={10} />
+            }
           </Button>
         </form>
       </Modal>

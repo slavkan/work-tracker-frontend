@@ -9,6 +9,7 @@ import {
   Table,
   Tooltip,
   Text,
+  Loader,
 } from "@mantine/core";
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./page.module.css";
@@ -32,6 +33,8 @@ function page() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [personEdit, setPersonEdit] = useState<Person | null>(null);
   const [personDelete, setPersonDelete] = useState<Person | null>(null);
+
+  const [loadingQuery, setLoadingQuery] = useState(true);
 
   const [elements, setElements] = useState<any[]>([]);
   const [filterQuery, setFilterQuery] = useState<string>("");
@@ -74,10 +77,10 @@ function page() {
 
   //Fetch users
   const fetchData = useCallback(async () => {
+    setLoadingQuery(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/persons/filter?page=${
-          currentPage - 1
+        `${process.env.NEXT_PUBLIC_API_URL}/persons/filter?page=${currentPage - 1
         }&size=${pageSize}${filterQuery}`,
         {
           method: "GET",
@@ -87,6 +90,8 @@ function page() {
           },
         }
       );
+      
+      setLoadingQuery(false);
 
       if (response.ok) {
         const responseData = await response.json();
@@ -154,11 +159,9 @@ function page() {
         companyAdmin: person.companyAdmin,
         supervisor: person.supervisor,
         worker: person.worker,
-        rolesDisplay: `${person.admin ? "(Admin) " : ""}${
-          person.companyAdmin ? "(Admin kompanije) " : ""
-        }${person.supervisor ? "(Voditelj smjene) " : ""}${
-          person.worker ? "(Radnik) " : ""
-        }`,
+        rolesDisplay: `${person.admin ? "(Admin) " : ""}${person.companyAdmin ? "(Admin kompanije) " : ""
+          }${person.supervisor ? "(Voditelj smjene) " : ""}${person.worker ? "(Radnik) " : ""
+          }`,
       }));
       setElements(transformedElements);
     }
@@ -269,9 +272,23 @@ function page() {
                   <Table.Th className={styles.column}></Table.Th>
                 </Table.Tr>
               </Table.Thead>
-              <Table.Tbody>{rows}</Table.Tbody>
+              <Table.Tbody>
+                {loadingQuery ? (
+                  <Table.Tr>
+                    <Table.Td colSpan={6} style={{ textAlign: 'center' }}>
+                      <div className={styles.loadingColumn}>
+                        <Loader />
+                      </div>
+                    </Table.Td>
+                  </Table.Tr>
+                ) : (
+                  rows
+                )}
+
+              </Table.Tbody>
             </Table>
           </ScrollArea>
+
         </div>
         <Pagination
           value={currentPage}

@@ -8,6 +8,7 @@ import {
   Tooltip,
   Text,
   Accordion,
+  Loader,
 } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
@@ -46,6 +47,10 @@ export default function EditUserModalForCompanyAdmin({
   const [invalidPhone, setInvalidPhone] = useState(false);
 
   // console.log("STUDIES INSIDE EDIT: ", studies);
+
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
+  const [loadingUserDepartments, setLoadingUserDepartments] = useState(false);
 
   const handleClose = () => {
     setPersonEdit(null);
@@ -131,6 +136,7 @@ export default function EditUserModalForCompanyAdmin({
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/persons/${personId}`,
@@ -143,6 +149,8 @@ export default function EditUserModalForCompanyAdmin({
           body: JSON.stringify(newPersonForm),
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshUsers(true);
@@ -210,6 +218,8 @@ export default function EditUserModalForCompanyAdmin({
     const { name, value } = e.target;
     const departmentId = parseInt(name);
 
+    setLoadingUserDepartments(true);
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/department-person?personId=${personId}&departmentId=${departmentId}`,
@@ -221,6 +231,8 @@ export default function EditUserModalForCompanyAdmin({
           },
         }
       );
+
+      setLoadingUserDepartments(false);
 
       if (response.ok) {
         // setRefreshUsers(true);
@@ -257,8 +269,9 @@ export default function EditUserModalForCompanyAdmin({
   };
 
   useEffect(() => {
-    console.log("Fetching user's subjects");
+    console.log("Fetching user's departments");
     const fetchSubjects = async () => {
+      setLoadingUserDepartments(true);
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/department-person?personId=${personId}`,
@@ -270,6 +283,7 @@ export default function EditUserModalForCompanyAdmin({
             },
           }
         );
+        setLoadingUserDepartments(false);
         if (response.ok) {
           const data: Department[] = await response.json();
           const extractedDepartmentIds = data.map((item: any) => item.department.id);
@@ -294,17 +308,18 @@ export default function EditUserModalForCompanyAdmin({
   const items = departments ? (
     departments.map((department) => {
       const isConnected = departmentIds.includes(department.id);
-     (
-      <Checkbox
-        name={department.id.toString()}
-        label={`${department.name}`}
-        checked={isConnected}
-        my={10}
-        onChange={(e) =>
-          handlePersonDepartmentConnection(e, isConnected)
-        }
-      />
-    )})
+      (
+        <Checkbox
+          name={department.id.toString()}
+          label={`${department.name}`}
+          checked={isConnected}
+          my={10}
+          onChange={(e) =>
+            handlePersonDepartmentConnection(e, isConnected)
+          }
+        />
+      )
+    })
   ) : (
     <div>No studies available</div>
   );
@@ -396,6 +411,9 @@ export default function EditUserModalForCompanyAdmin({
               </div>
               <Button type="submit" fullWidth mt={20}>
                 Uredi
+                {loadingButtonQuery &&
+                  <Loader color="white" size={20} ml={10} />
+                }
               </Button>
               <Button
                 type="button"
@@ -422,14 +440,16 @@ export default function EditUserModalForCompanyAdmin({
                   const isConnected = departmentIds.includes(company.id);
                   return (
                     <div key={company.id}>
-                      <Checkbox
-                        name={company.id.toString()}
-                        label={`${company.name}`}
-                        checked={isConnected}
-                        onChange={(e) =>
-                          handlePersonDepartmentConnection(e, isConnected)
-                        }
-                      />
+                      {loadingUserDepartments ? (
+                        <Loader size={20} />) : (<Checkbox
+                          name={company.id.toString()}
+                          label={`${company.name}`}
+                          checked={isConnected}
+                          onChange={(e) =>
+                            handlePersonDepartmentConnection(e, isConnected)
+                          }
+                        />)}
+
                     </div>
                   );
                 })

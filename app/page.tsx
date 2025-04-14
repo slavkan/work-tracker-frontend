@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import styles from "./page.module.css";
-import { PasswordInput, TextInput, Fieldset, Button } from "@mantine/core";
+import { PasswordInput, TextInput, Fieldset, Button, Loader } from "@mantine/core";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,8 @@ export default function Home() {
     password: "",
   });
 
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
   const handleFormInput = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     if (name === "username") {
@@ -32,6 +34,7 @@ export default function Home() {
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
@@ -43,6 +46,8 @@ export default function Home() {
           body: JSON.stringify(loginCred),
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         const responseData = await response.json();
@@ -102,20 +107,25 @@ export default function Home() {
               error={invalidPassword ? "Netočna lozinka" : undefined}
               mb={20}
             />
-            <Button type="submit">Prijavi se</Button>
+            <Button type="submit">
+              Prijavi se
+              {loadingButtonQuery &&
+                <Loader color="white" size={20} ml={10} />
+              }
+            </Button>
           </Fieldset>
         </form>
       </div>
       <div className={styles.addCredsContainer1}>
-        <Button variant="light" color="gray" onClick={() => quickCredsSet("sRamljak", "ovWd484J")}>sRamljak</Button>
-        <Button variant="light" color="gray" onClick={() => quickCredsSet("kRakic", "Q1Q10wrj")}>kRakic</Button>
-        <Button variant="light" color="gray" onClick={() => quickCredsSet("jJagoda", "DmrJp95p")}>jJagoda</Button>
-        <Button variant="light" color="gray" onClick={() => quickCredsSet("mMarkic", "FEe9Fi3Z")}>mMarkic</Button>
+        <Button variant="light" color="gray" onClick={() => quickCredsSet("sRamljak", "Sifra123")}>sRamljak</Button>
+        <Button variant="light" color="gray" onClick={() => quickCredsSet("kRakic", "Sifra123")}>kRakic</Button>
+        <Button variant="light" color="gray" onClick={() => quickCredsSet("jJagoda", "Sifra123")}>jJagoda</Button>
+        <Button variant="light" color="gray" onClick={() => quickCredsSet("mMarkic", "Sifra123")}>mMarkic</Button>
       </div>
       <div className={styles.addCredsContainer2}>
-        <Button variant="light" color="gray" onClick={() => quickCredsSet("pPeric", "QQ2K1uda")}>pPeric</Button>
-        <Button variant="light" color="gray" onClick={() => quickCredsSet("fTomas", "fULI26iz")}>fTomas</Button>
-        <Button variant="light" color="gray" onClick={() => quickCredsSet("dDrljepan", "04Pnr79G")}>dDrljepan</Button>
+        <Button variant="light" color="gray" onClick={() => quickCredsSet("pPeric", "Sifra123")}>pPeric</Button>
+        <Button variant="light" color="gray" onClick={() => quickCredsSet("fTomas", "Sifra123")}>fTomas</Button>
+        <Button variant="light" color="gray" onClick={() => quickCredsSet("dDrljepan", "Sifra123")}>dDrljepan</Button>
         <Button variant="light" color="gray" onClick={() => quickCredsSet("", "")}></Button>
       </div>
     </div>

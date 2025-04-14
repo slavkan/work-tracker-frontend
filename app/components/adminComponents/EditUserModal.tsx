@@ -6,6 +6,7 @@ import {
   Checkbox,
   Tabs,
   Tooltip,
+  Loader,
 } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
@@ -42,6 +43,10 @@ export default function EditUserModal({
   const [invalidUsername, setInvalidUsername] = useState(false);
   const [invalidIndexNumber, setInvalidIndexNumber] = useState(false);
   const [invalidAcademicTitle, setInvalidAcademicTitle] = useState(false);
+
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
+  const [loadingUserCompanies, setLoadingUserCompanies] = useState(false);
 
   const handleClose = () => {
     setPersonEdit(null);
@@ -126,6 +131,7 @@ export default function EditUserModal({
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/persons/${personId}`,
@@ -138,6 +144,7 @@ export default function EditUserModal({
           body: JSON.stringify(newPersonForm),
         }
       );
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshUsers(true);
@@ -205,6 +212,8 @@ export default function EditUserModal({
     const { name, value } = e.target;
     const companyId = parseInt(name);
 
+    setLoadingUserCompanies(true);
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/company-person?personId=${personId}&companyId=${companyId}`,
@@ -216,6 +225,8 @@ export default function EditUserModal({
           },
         }
       );
+
+      setLoadingUserCompanies(false);
 
       if (response.ok) {
         // setRefreshUsers(true);
@@ -253,6 +264,7 @@ export default function EditUserModal({
 
   useEffect(() => {
     console.log("Fetching user's companies");
+    setLoadingUserCompanies(true);
     const fetchCompanies = async () => {
       try {
         const response = await fetch(
@@ -265,6 +277,7 @@ export default function EditUserModal({
             },
           }
         );
+        setLoadingUserCompanies(false);
         if (response.ok) {
           const data: CompanyPerson[] = await response.json();
           const extractedCompanyIds = data.map((item) => item.company.id);
@@ -371,13 +384,16 @@ export default function EditUserModal({
                     checked={newPersonForm.worker}
                     mb={10}
                     name="worker"
-                    label="Radnik"
+                    label="radnik"
                     onChange={handleFormInput}
                   />
                 </div>
               </div>
               <Button type="submit" fullWidth mt={20}>
                 Uredi
+                {loadingButtonQuery &&
+                  <Loader color="white" size={20} ml={10} />
+                }
               </Button>
               <Button
                 type="button"
@@ -404,7 +420,10 @@ export default function EditUserModal({
                   const isConnected = companyIds.includes(company.id);
                   return (
                     <div key={company.id}>
-                      <Checkbox
+                      {loadingUserCompanies ? (
+                        <Loader size={20} />
+                      ):(
+                        <Checkbox
                         name={company.id.toString()}
                         label={`${company.name}`}
                         checked={isConnected}
@@ -412,6 +431,8 @@ export default function EditUserModal({
                           handlePersonCompanyConnection(e, isConnected)
                         }
                       />
+                      )}
+                      
                     </div>
                   );
                 })

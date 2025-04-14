@@ -17,6 +17,7 @@ import {
   ScrollArea,
   rem,
   useMantineTheme,
+  Loader,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "./Navbar2.module.css";
@@ -47,6 +48,8 @@ const NavbarCompanyAdmin: React.FC<NavbarCompanyAdminProps> = ({
 
   const theme = useMantineTheme();
 
+  const [loadingQuery, setLoadingQuery] = useState(true);
+
   const decodedToken = getDecodedToken();
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -68,6 +71,7 @@ const NavbarCompanyAdmin: React.FC<NavbarCompanyAdminProps> = ({
 
   //Fetch worker's companies
   const fetchData = useCallback(async () => {
+    setLoadingQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/company-person?personId=${userId}`,
@@ -79,6 +83,8 @@ const NavbarCompanyAdmin: React.FC<NavbarCompanyAdminProps> = ({
           },
         }
       );
+
+      setLoadingQuery(false);
 
       if (response.ok) {
         const data: CompanyPerson[] = await response.json();
@@ -190,7 +196,10 @@ const NavbarCompanyAdmin: React.FC<NavbarCompanyAdminProps> = ({
                 <Divider my="sm" />
 
                 <SimpleGrid cols={2} spacing={0}>
-                  {linksCompaniesForUsers}
+                  {loadingQuery ? (<Loader size={25} />) : (
+                    linksCompaniesForUsers
+                  )}
+
                 </SimpleGrid>
               </HoverCard.Dropdown>
             </HoverCard>
@@ -227,7 +236,9 @@ const NavbarCompanyAdmin: React.FC<NavbarCompanyAdminProps> = ({
                 <Divider my="sm" />
 
                 <SimpleGrid cols={2} spacing={0}>
-                  {linksFaculties}
+                {loadingQuery ? (<Loader size={25} />) : (
+                    linksFaculties
+                  )}
                 </SimpleGrid>
               </HoverCard.Dropdown>
             </HoverCard>

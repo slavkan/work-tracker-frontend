@@ -1,7 +1,7 @@
 "use client";
 import useCheckRole from "@/app/auth/useCheckRole";
 import { PageLoading } from "@/app/components/PageLoading";
-import { Button, Pagination, ScrollArea, Table, Tooltip, Text } from "@mantine/core";
+import { Button, Pagination, ScrollArea, Table, Tooltip, Text, Loader } from "@mantine/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 import Image from "next/image";
@@ -59,6 +59,8 @@ function page() {
 
   const [companyName, setCompanyName] = useState<string>("");
 
+  const [loadingQuery, setLoadingQuery] = useState(true);
+
   const [
     openedAddUserModal,
     { open: openAddUserModal, close: closeAddUserModal },
@@ -89,10 +91,10 @@ function page() {
 
   //Fetch users
   const fetchData = useCallback(async () => {
+    setLoadingQuery(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/persons/filter?page=${
-          currentPage - 1
+        `${process.env.NEXT_PUBLIC_API_URL}/persons/filter?page=${currentPage - 1
         }&size=${pageSize}&companyId=${companyId}${filterQuery}`,
         {
           method: "GET",
@@ -102,6 +104,8 @@ function page() {
           },
         }
       );
+
+      setLoadingQuery(false);
 
       if (response.ok) {
         const responseData = await response.json();
@@ -192,49 +196,49 @@ function page() {
   }, [authorized, fetchFacultyDetails]);
 
 
-    //Fetch worker's departments
-    const fetchDataDepartment = useCallback(
-      async (departmentId: number) => {
-        try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/study?departmentId=${departmentId}`,
-            {
-              method: "GET",
-              headers: {
-                "content-type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (response.ok) {
-            const data: Department[] = await response.json();
-            // console.log(`Studies for faculty ${facultyId}:`, data);
-            setDepartments((prevDepartments) => {
-              const newDepartments = data.filter(
-                (newDepartment) => !prevDepartments.some((department) => department.id === newDepartment.id)
-              );
-              return [...prevDepartments, ...newDepartments];
-            });
-          } else {
-            const errorData = await response.json();
-            if (errorData) {
-              console.log(errorData);
-            }
+  //Fetch worker's departments
+  const fetchDataDepartment = useCallback(
+    async (departmentId: number) => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/study?departmentId=${departmentId}`,
+          {
+            method: "GET",
+            headers: {
+              "content-type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
           }
-        } catch (error) {
-          console.log("Error attempting to fetch data: ", error);
-        }
-      },
-      [userId]
-    );
+        );
 
-    useEffect(() => {
-      if (companies.length > 0 && !hasFetchedDepartments.current) {
-        fetchDataDepartment(companies[0].id);
-        hasFetchedDepartments.current = true;
+        if (response.ok) {
+          const data: Department[] = await response.json();
+          // console.log(`Studies for faculty ${facultyId}:`, data);
+          setDepartments((prevDepartments) => {
+            const newDepartments = data.filter(
+              (newDepartment) => !prevDepartments.some((department) => department.id === newDepartment.id)
+            );
+            return [...prevDepartments, ...newDepartments];
+          });
+        } else {
+          const errorData = await response.json();
+          if (errorData) {
+            console.log(errorData);
+          }
+        }
+      } catch (error) {
+        console.log("Error attempting to fetch data: ", error);
       }
-    }, [companies, fetchDataDepartment]);
+    },
+    [userId]
+  );
+
+  useEffect(() => {
+    if (companies.length > 0 && !hasFetchedDepartments.current) {
+      fetchDataDepartment(companies[0].id);
+      hasFetchedDepartments.current = true;
+    }
+  }, [companies, fetchDataDepartment]);
 
 
   useEffect(() => {
@@ -250,11 +254,9 @@ function page() {
         companyAdmin: person.companyAdmin,
         supervisor: person.supervisor,
         worker: person.worker,
-        rolesDisplay: `${person.admin ? "(Admin) " : ""}${
-          person.companyAdmin ? "(Admin kompanije) " : ""
-        }${person.supervisor ? "(Voditelj smjene) " : ""}${
-          person.worker ? "(Radnik) " : ""
-        }`,
+        rolesDisplay: `${person.admin ? "(Admin) " : ""}${person.companyAdmin ? "(Admin kompanije) " : ""
+          }${person.supervisor ? "(Voditelj smjene) " : ""}${person.worker ? "(Radnik) " : ""
+          }`,
       }));
       setElements(transformedElements);
     }
@@ -307,15 +309,15 @@ function page() {
   ));
 
   if (authorized === "CHECKING") {
-    return <PageLoading visible={true}/>;
+    return <PageLoading visible={true} />;
   }
 
   return (
     <div>
-      <NavbarWorker token={token} departmentsChanged={false}/>
+      <NavbarWorker token={token} departmentsChanged={false} />
       <div className={styles.mainDiv}>
         <div className={styles.pageContent}>
-        <div className={styles.pageHeading}>
+          <div className={styles.pageHeading}>
             <Text size="lg" fw={500}>
               Korisnici
             </Text>
@@ -358,7 +360,19 @@ function page() {
                   <Table.Th className={styles.column}></Table.Th>
                 </Table.Tr>
               </Table.Thead>
-              <Table.Tbody>{rows}</Table.Tbody>
+              <Table.Tbody>
+                {loadingQuery ? (
+                  <Table.Tr>
+                    <Table.Td colSpan={6} style={{ textAlign: 'center' }}>
+                      <div className={styles.loadingColumn}>
+                        <Loader />
+                      </div>
+                    </Table.Td>
+                  </Table.Tr>
+                ) : (
+                  rows
+                )}
+              </Table.Tbody>
             </Table>
           </ScrollArea>
         </div>
@@ -390,7 +404,7 @@ function page() {
         personEdit={personEdit}
         setPersonEdit={setPersonEdit}
         departments={departments}
-        // studies={studies}
+      // studies={studies}
       />
       <FilterUsersDrawer
         opened={openedFilterDrawer}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, TextInput, Checkbox, PasswordInput } from "@mantine/core";
+import { Modal, Button, TextInput, Checkbox, PasswordInput, Loader } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
 import { notifications } from "@mantine/notifications";
@@ -32,7 +32,9 @@ export default function StartWorkShiftModal({
   const [invalidPassword, setInvalidPassword] = useState(false);
   const decodedToken = getDecodedToken();
 
-  
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
+
 
   const handleClose = () => {
     setLoginCred({
@@ -60,6 +62,7 @@ export default function StartWorkShiftModal({
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
@@ -71,9 +74,12 @@ export default function StartWorkShiftModal({
           body: JSON.stringify(loginCred),
         }
       );
-  
+
+      setLoadingButtonQuery(false);
+
       if (response.ok) {
         // Hardcoded request to start the class session
+        setLoadingButtonQuery(true);
         const startSessionResponse = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/work-shifts/start?departmentId=${departmentId}&supervisorId=${supervisorId}`,
           {
@@ -84,7 +90,9 @@ export default function StartWorkShiftModal({
             },
           }
         );
-  
+
+        setLoadingButtonQuery(false);
+
         if (startSessionResponse.ok) {
           const responseData = await startSessionResponse.json();
           router.push(`/supervisor/session?sessionId=${responseData.id}&departmentId=${departmentId}`);
@@ -136,6 +144,9 @@ export default function StartWorkShiftModal({
           />
           <Button type="submit" fullWidth mt={20}>
             Pokreni
+            {loadingButtonQuery &&
+              <Loader color="white" size={20} ml={10} />
+            }
           </Button>
         </form>
       </Modal>

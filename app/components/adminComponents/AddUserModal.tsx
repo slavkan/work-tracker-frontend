@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, TextInput, Checkbox } from "@mantine/core";
+import { Modal, Button, TextInput, Checkbox, Loader } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
 import { notifications } from "@mantine/notifications";
@@ -27,6 +27,8 @@ export default function AddUserModal({
   const [invalidEmail, setInvalidEmail] = useState(false);
   const [invalidUsername, setInvalidUsername] = useState(false);
   const [invalidPhone, setInvalidPhone] = useState(false);
+
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
 
   const handleClose = () => {
     setNewPersonForm({
@@ -87,6 +89,7 @@ export default function AddUserModal({
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/persons`,
@@ -100,6 +103,7 @@ export default function AddUserModal({
         }
       );
 
+      setLoadingButtonQuery(false);
       if (response.ok) {
         setRefreshUsers(true);
         handleClose();
@@ -199,6 +203,9 @@ export default function AddUserModal({
           </div>
           <Button type="submit" fullWidth mt={20}>
             Dodaj
+            {loadingButtonQuery && 
+              <Loader color="white" size={20} ml={10}/>
+            }
           </Button>
           {invalidUsername && (
             <div className={styles.error}>Korisničko ime već postoji</div>

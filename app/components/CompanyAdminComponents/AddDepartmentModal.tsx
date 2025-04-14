@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, TextInput, Checkbox } from "@mantine/core";
+import { Modal, Button, TextInput, Checkbox, Loader } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
 import { notifications } from "@mantine/notifications";
@@ -28,6 +28,8 @@ export default function AddDepartmentModal({
   const [invalidName, setInvalidName] = useState(false);
   const [invalidAbbreviation, setInvalidAbbreviation] = useState(false);
 
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
   const handleClose = () => {
     setNewDepartmentForm({
       name: "",
@@ -40,9 +42,9 @@ export default function AddDepartmentModal({
 
   const [newDepartmentForm, setNewDepartmentForm] = useState({
     name: "",
-      company: {
-        id: companyId
-      }
+    company: {
+      id: companyId
+    }
   });
 
   const handleFormInput = (e: React.ChangeEvent<any>) => {
@@ -53,10 +55,11 @@ export default function AddDepartmentModal({
     }
   };
 
-  
+
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/department`,
@@ -69,6 +72,8 @@ export default function AddDepartmentModal({
           body: JSON.stringify(newDepartmentForm),
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshDepartments(true);
@@ -105,6 +110,9 @@ export default function AddDepartmentModal({
           />
           <Button type="submit" fullWidth mt={20}>
             Dodaj
+            {loadingButtonQuery &&
+              <Loader color="white" size={20} ml={10} />
+            }
           </Button>
         </form>
       </Modal>

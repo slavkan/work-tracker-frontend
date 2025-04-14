@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
-import { Button } from "@mantine/core";
+import { Button, Loader } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import '@mantine/notifications/styles.css';
 import { mapArrivalMessageForWorker } from "@/app/utils/mapArrivalMessageForWorker";
@@ -30,6 +30,8 @@ export default function Page() {
     useState(false);
 
   const [debug, setDebug] = useState("A");
+
+  const [loadingScan, setLoadingScan] = useState(false);
 
   const handleScan = (detectedCodes: IDetectedBarcode[]) => {
     if (detectedCodes.length > 0) {
@@ -52,6 +54,7 @@ export default function Page() {
   useEffect(() => {
     if (alreadyConnectedToSocket === false) {
       if (sessionId !== "" && qrExtractedData !== "") {
+        setLoadingScan(true);
         setAlreadyConnectedToSocket(true);
         const socket = new SockJS(`${process.env.NEXT_PUBLIC_API_URL}/ws`);
         const stompClient = over(socket);
@@ -76,6 +79,7 @@ export default function Page() {
   }, [sessionId, alreadyConnectedToSocket, qrExtractedData]);
 
   const onPrivateMessage = (payload: any) => {
+    setLoadingScan(false);
     var payloadData = JSON.parse(payload.body);
     const { finalMessage, status } = mapArrivalMessageForWorker(
       payloadData.message
@@ -97,6 +101,7 @@ export default function Page() {
     return () => {
       if (stompClientRef.current) {
         stompClientRef.current.disconnect();
+        setLoadingScan(false);
       }
     };
   }, []);
@@ -151,9 +156,11 @@ export default function Page() {
                 },
               }}
             />
+          ) : loadingScan ? (
+            <Loader />
           ) : (
             <Button onClick={() => setIsScannerActive(true)}>
-              Skenira ponovno
+              Skeniraj ponovno
             </Button>
           )}
         </div>
@@ -164,4 +171,5 @@ export default function Page() {
       </div>
     </div>
   );
+
 }

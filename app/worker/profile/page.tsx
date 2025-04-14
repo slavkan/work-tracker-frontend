@@ -13,6 +13,7 @@ import {
   Text,
   Input,
   PasswordInput,
+  Loader,
 } from "@mantine/core";
 import { useSearchParams } from "next/navigation";
 import React, {
@@ -31,6 +32,8 @@ function page() {
 
   const searchParams = useSearchParams();
   const personId = searchParams?.get("personId") ?? "";
+
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
 
   const { authorized, person } = useCheckRoleAndPersonId(
     "ROLE_WORKER",
@@ -90,6 +93,7 @@ function page() {
 
   async function handlePasswordChangeFetch() {
     console.log(JSON.stringify({ password: loginCred }));
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/change-password/${personId}`,
@@ -102,6 +106,8 @@ function page() {
           body: JSON.stringify({ password: loginCred }),
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (!response.ok) {
         throw new Error("Failed to change password");
@@ -168,6 +174,9 @@ function page() {
             onClick={handlePasswordChangeFetch}
           >
             Zamijeni lozinku
+            {loadingButtonQuery &&
+              <Loader color="white" size={20} ml={10} />
+            }
           </Button>
 
           {numberOfRoles > 1 && (

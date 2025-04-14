@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, TextInput, Checkbox } from "@mantine/core";
+import { Modal, Button, TextInput, Checkbox, Loader } from "@mantine/core";
 import "@mantine/notifications/styles.css";
 import { notifications } from "@mantine/notifications";
 import { Company } from "@/app/utils/types";
@@ -35,6 +35,8 @@ export default function DeleteCompanyModal({
 
   const [companyId, setCompanyId] = useState<string | null>(null);
 
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
   const [deleteCompanyForm, setDeleteCompanyForm] = useState({
     name: "",
     abbreviation: "",
@@ -52,6 +54,7 @@ export default function DeleteCompanyModal({
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/companies/${companyId}`,
@@ -63,6 +66,8 @@ export default function DeleteCompanyModal({
           },
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshCompanies(true);
@@ -108,6 +113,9 @@ export default function DeleteCompanyModal({
             </Button>
             <Button type="submit" fullWidth mt={20} color="red">
               Obriši
+              {loadingButtonQuery &&
+                <Loader color="white" size={20} ml={10} />
+              }
             </Button>
           </div>
         </form>

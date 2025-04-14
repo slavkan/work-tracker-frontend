@@ -9,6 +9,7 @@ import {
   Table,
   Tooltip,
   Text,
+  Loader,
 } from "@mantine/core";
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./page.module.css";
@@ -34,6 +35,8 @@ function page() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [companyEdit, setCompanyEdit] = useState<Company | null>(null);
   const [companyDelete, setCompanyDelete] = useState<Company | null>(null);
+
+  const [loadingQuery, setLoadingQuery] = useState(true);
 
   const [elements, setElements] = useState<any[]>([]);
 
@@ -61,6 +64,7 @@ function page() {
 
   //Fetch companies
   const fetchData = useCallback(async () => {
+    setLoadingQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/companies`,
@@ -72,6 +76,8 @@ function page() {
           },
         }
       );
+
+      setLoadingQuery(false);
 
       if (response.ok) {
         const responseData = await response.json();
@@ -184,9 +190,23 @@ function page() {
                 <Table.Tr>
                   <Table.Th className={styles.column}>Ime</Table.Th>
                   <Table.Th className={styles.column}>Kratica</Table.Th>
+                  <Table.Th className={styles.column}></Table.Th>
                 </Table.Tr>
               </Table.Thead>
-              <Table.Tbody>{rows}</Table.Tbody>
+              <Table.Tbody>
+                {loadingQuery ? (
+                  <Table.Tr>
+                    <Table.Td colSpan={3} style={{ textAlign: 'center' }}>
+                      <div className={styles.loadingColumn}>
+                        <Loader />
+                      </div>
+                    </Table.Td>
+                  </Table.Tr>
+                ) : (
+                  rows
+                )}
+
+              </Table.Tbody>
             </Table>
           </ScrollArea>
         </div>

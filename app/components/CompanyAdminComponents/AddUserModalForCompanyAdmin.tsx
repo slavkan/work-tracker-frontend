@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, TextInput, Checkbox } from "@mantine/core";
+import { Modal, Button, TextInput, Checkbox, Loader } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
 import { notifications } from "@mantine/notifications";
@@ -29,6 +29,8 @@ export default function AddUserModalForCompanyAdmin({
   const [invalidEmail, setInvalidEmail] = useState(false);
   const [invalidUsername, setInvalidUsername] = useState(false);
   const [invalidPhone, setInvalidPhone] = useState(false);
+
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
 
   const handleClose = () => {
     setNewPersonForm({
@@ -89,6 +91,7 @@ export default function AddUserModalForCompanyAdmin({
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/persons`,
@@ -101,6 +104,8 @@ export default function AddUserModalForCompanyAdmin({
           body: JSON.stringify(newPersonForm),
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setNewUserToCompany(true);
@@ -129,6 +134,7 @@ export default function AddUserModalForCompanyAdmin({
 
 
   const addUserToCompany = async (userId: string, companyId: number) => {
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/company-person?personId=${userId}&companyId=${companyId}`,
@@ -140,6 +146,8 @@ export default function AddUserModalForCompanyAdmin({
           },
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshUsers(true);
@@ -205,7 +213,7 @@ export default function AddUserModalForCompanyAdmin({
           />
           <div className={styles.checkboxTwoRows}>
             <div>
-            <Checkbox
+              <Checkbox
                 mb={10}
                 name="companyAdmin"
                 label="Admin kompanije"
@@ -227,6 +235,9 @@ export default function AddUserModalForCompanyAdmin({
           </div>
           <Button type="submit" fullWidth mt={20}>
             Dodaj
+            {loadingButtonQuery &&
+              <Loader color="white" size={20} ml={10} />
+            }
           </Button>
           {invalidUsername && (
             <div className={styles.error}>Korisničko ime već postoji</div>

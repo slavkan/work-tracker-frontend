@@ -9,6 +9,7 @@ import {
   Table,
   Tooltip,
   Text,
+  Loader,
 } from "@mantine/core";
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./page.module.css";
@@ -39,6 +40,8 @@ function page() {
   const companyId = searchParams?.get("companyId") ?? "";
   const companyIdNumber = parseInt(companyId);
   const authorized = useCheckRoleAndFaculty("ROLE_COMPANY_ADMIN", companyId);
+
+  const [loadingQuery, setLoadingQuery] = useState(true);
 
   const [response, setResponse] = useState<Department[] | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -73,6 +76,7 @@ function page() {
 
   //Fetch departments
   const fetchData = useCallback(async () => {
+    setLoadingQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/department?companyId=${companyId}`,
@@ -84,6 +88,8 @@ function page() {
           },
         }
       );
+
+      setLoadingQuery(false);
 
       if (response.ok) {
         const responseData = await response.json();
@@ -234,7 +240,19 @@ function page() {
                   <Table.Th className={styles.column}></Table.Th>
                 </Table.Tr>
               </Table.Thead>
-              <Table.Tbody>{rows}</Table.Tbody>
+              <Table.Tbody>
+              {loadingQuery ? (
+                  <Table.Tr>
+                    <Table.Td colSpan={2} style={{ textAlign: 'center' }}>
+                      <div className={styles.loadingColumn}>
+                        <Loader />
+                      </div>
+                    </Table.Td>
+                  </Table.Tr>
+                ) : (
+                  rows
+                )}
+              </Table.Tbody>
             </Table>
           </ScrollArea>
         </div>

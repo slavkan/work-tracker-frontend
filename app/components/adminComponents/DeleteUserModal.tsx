@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, TextInput, Checkbox } from "@mantine/core";
+import { Modal, Button, TextInput, Checkbox, Loader } from "@mantine/core";
 import "@mantine/notifications/styles.css";
 import { notifications } from "@mantine/notifications";
 import { Person } from "@/app/utils/types";
@@ -31,29 +31,29 @@ export default function DeleteUserModal({
       lastName: "",
       email: "",
       username: "",
-      indexNumber: "",
-      academicTitle: "",
+      phone: "",
       admin: false,
+      companyAdmin: false,
+      supervisor: false,
       worker: false,
-      professor: false,
-      student: false,
     });
     close();
   };
 
   const [personId, setPersonId] = useState<string | null>(null);
 
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
   const [deletePersonForm, setDeletePersonForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     username: "",
-    indexNumber: "",
-    academicTitle: "",
+    phone: "",
     admin: false,
+    companyAdmin: false,
+    supervisor: false,
     worker: false,
-    professor: false,
-    student: false,
   });
 
   useEffect(() => {
@@ -64,18 +64,18 @@ export default function DeleteUserModal({
         lastName: personDelete.lastName || "",
         email: personDelete.email || "",
         username: personDelete.username || "",
-        indexNumber: personDelete.indexNumber || "",
-        academicTitle: personDelete.academicTitle || "",
+        phone: personDelete.phone || "",
         admin: personDelete.admin || false,
+        companyAdmin: personDelete.companyAdmin || false,
+        supervisor: personDelete.supervisor || false,
         worker: personDelete.worker || false,
-        professor: personDelete.professor || false,
-        student: personDelete.student || false,
       });
     }
   }, [opened, personDelete]);
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/persons/${personId}`,
@@ -87,6 +87,8 @@ export default function DeleteUserModal({
           },
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshUsers(true);
@@ -124,6 +126,9 @@ export default function DeleteUserModal({
             </Button>
             <Button type="submit" fullWidth mt={20} color="red">
               Obriši
+              {loadingButtonQuery &&
+                <Loader color="white" size={20} ml={10} />
+              }
             </Button>
           </div>
         </form>

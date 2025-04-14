@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, TextInput, Checkbox } from "@mantine/core";
+import { Modal, Button, TextInput, Checkbox, Loader } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
 import { notifications } from "@mantine/notifications";
@@ -25,6 +25,8 @@ export default function AddCompanyModal({
   const [invalidName, setInvalidName] = useState(false);
   const [invalidAbbreviation, setInvalidAbbreviation] = useState(false);
 
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
   const handleClose = () => {
     setNewCompanyForm({
       name: "",
@@ -49,9 +51,10 @@ export default function AddCompanyModal({
     }
   };
 
-  
+
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
+    setLoadingButtonQuery(true);
     e.preventDefault();
     try {
       const response = await fetch(
@@ -65,6 +68,8 @@ export default function AddCompanyModal({
           body: JSON.stringify(newCompanyForm),
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshCompanies(true);
@@ -108,6 +113,9 @@ export default function AddCompanyModal({
           />
           <Button type="submit" fullWidth mt={20}>
             Dodaj
+            {loadingButtonQuery &&
+              <Loader color="white" size={20} ml={10} />
+            }
           </Button>
         </form>
       </Modal>

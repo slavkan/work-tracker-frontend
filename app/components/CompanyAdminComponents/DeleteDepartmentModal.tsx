@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, TextInput, Checkbox } from "@mantine/core";
+import { Modal, Button, TextInput, Checkbox, Loader } from "@mantine/core";
 import "@mantine/notifications/styles.css";
 import { notifications } from "@mantine/notifications";
 import { Department } from "@/app/utils/types";
@@ -36,6 +36,8 @@ export default function DeleteDepartmentModal({
 
   const [departmentId, setDepartmentId] = useState<string | null>(null);
 
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
   const [deleteDepartmentForm, setDeleteDepartmentForm] = useState({
     name: "",
   });
@@ -51,6 +53,7 @@ export default function DeleteDepartmentModal({
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
     e.preventDefault();
+    setLoadingButtonQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/department/${departmentId}`,
@@ -62,6 +65,8 @@ export default function DeleteDepartmentModal({
           },
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshDepartments(true);
@@ -108,6 +113,9 @@ export default function DeleteDepartmentModal({
             </Button>
             <Button type="submit" fullWidth mt={20} color="red">
               Obriši
+              {loadingButtonQuery &&
+                <Loader color="white" size={20} ml={10} />
+              }
             </Button>
           </div>
         </form>

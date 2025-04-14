@@ -6,6 +6,7 @@ import {
   Checkbox,
   Tabs,
   Tooltip,
+  Loader,
 } from "@mantine/core";
 import styles from "@/app/components/adminComponents/AddUserModal.module.css";
 import "@mantine/notifications/styles.css";
@@ -40,6 +41,8 @@ export default function EditDepartmentModal({
   const [invalidName, setInvalidName] = useState(false);
   const [invalidAbbreviation, setInvalidAbbreviation] = useState(false);
 
+  const [loadingButtonQuery, setLoadingButtonQuery] = useState(false);
+
   const handleClose = () => {
     setDepartmentEdit(null);
     setNewDepartmentForm({
@@ -55,9 +58,9 @@ export default function EditDepartmentModal({
 
   const [newDepartmentForm, setNewDepartmentForm] = useState({
     name: "",
-      company: {
-        id: companyId
-      }
+    company: {
+      id: companyId
+    }
   });
 
   useEffect(() => {
@@ -81,6 +84,7 @@ export default function EditDepartmentModal({
   };
 
   const onSubmit = async (e: React.ChangeEvent<any>) => {
+    setLoadingButtonQuery(true);
     e.preventDefault();
     try {
       const response = await fetch(
@@ -94,6 +98,8 @@ export default function EditDepartmentModal({
           body: JSON.stringify(newDepartmentForm),
         }
       );
+
+      setLoadingButtonQuery(false);
 
       if (response.ok) {
         setRefreshDepartments(true);
@@ -132,6 +138,9 @@ export default function EditDepartmentModal({
           />
           <Button type="submit" fullWidth mt={20}>
             Uredi
+            {loadingButtonQuery &&
+              <Loader color="white" size={20} ml={10} />
+            }
           </Button>
         </form>
       </Modal>

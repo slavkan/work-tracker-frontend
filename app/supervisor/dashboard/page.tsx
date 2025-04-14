@@ -12,7 +12,7 @@ import {
   // Study,
   DepartmentPerson,
 } from "@/app/utils/types";
-import { Accordion, Button, Text } from "@mantine/core";
+import { Accordion, Button, Loader, Text } from "@mantine/core";
 import Link from "next/link";
 import NavbarSupervisor from "@/app/components/NavbarSupervisor";
 
@@ -21,6 +21,8 @@ export default function Page() {
 
   const decodedToken = getDecodedToken();
   const [userId, setUserId] = useState<string | null>(null);
+
+  const [loadingQuery, setLoadingQuery] = useState(true);
 
   useEffect(() => {
     if (decodedToken) {
@@ -32,8 +34,9 @@ export default function Page() {
   const [departmentsExtracted, setDepartmentsExtracted] = useState<Department[] | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
 
-  //Fetch user's subjects
+  //Fetch user's departments
   const fetchSubjects = useCallback(async () => {
+    setLoadingQuery(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/department-person?personId=${userId}`,
@@ -45,6 +48,8 @@ export default function Page() {
           },
         }
       );
+
+      setLoadingQuery(false);
 
       if (response.ok) {
         const responseData: DepartmentPerson[] = await response.json();
@@ -112,18 +117,20 @@ export default function Page() {
 
   // Create faculty accordion
   const items =
-    companies.length > 0 ? (
-      companies.map((company) => (
-        <Accordion.Item key={company.id} value={company.name}>
-          <Accordion.Control>{company.name}</Accordion.Control>
-          <Accordion.Panel>
-            <Accordion variant="contained">{departmentItems(company.id)}</Accordion>
-          </Accordion.Panel>
-        </Accordion.Item>
-      ))
-    ) : (
-      <div>Nemate odjela</div>
-    );
+  companies.length > 0 ? (
+    companies.map((company) => (
+      <Accordion.Item key={company.id} value={company.name}>
+        <Accordion.Control>{company.name}</Accordion.Control>
+        <Accordion.Panel>
+          <Accordion variant="contained">{departmentItems(company.id)}</Accordion>
+        </Accordion.Panel>
+      </Accordion.Item>
+    ))
+  ) : loadingQuery ? (
+    <Loader />
+  ) : (
+    <div>Nemate odjela</div>
+  );
 
   const authorized = useCheckRole("ROLE_SUPERVISOR");
   if (authorized === "CHECKING") {
